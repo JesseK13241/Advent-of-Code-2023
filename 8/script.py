@@ -51,6 +51,8 @@ for element, directions in elements.items():
 
 print(f"instructions: {instructions}\n")
 
+'''
+
 def progress_path(element: str, instruction: str) -> None:
     print(f"Progressing path {element} to the {instruction}")
     if instruction == "L":
@@ -64,7 +66,6 @@ def progress_path(element: str, instruction: str) -> None:
 def all_finished() -> bool:
     return all([path.endswith("Z") for path in paths])
 
-'''
 cache = {} # for infinite loop detection
 
 while True:
