@@ -3,8 +3,8 @@
 from enum import Enum
 class Direction(Enum):
     NORTH = "north"
-    SOUTH = "south"
     WEST = "west"
+    SOUTH = "south"
     EAST = "east"
 
 with open("input") as f:
@@ -32,8 +32,8 @@ def tilt_line(line: str, direction: Direction = Direction.WEST) -> str:
 def tilt_platform(lines: list[str], direction: Direction) -> list[str]:
     # Moves the movable characters in a string matrix to any direction
     
-    print(f"\nBefore (tilt={direction}):")
-    print("\n".join(lines))
+    #print(f"\nBefore (tilt={direction}):")
+    #print("\n".join(lines))
     new_lines = []
 
     transpose_needed = False
@@ -55,8 +55,8 @@ def tilt_platform(lines: list[str], direction: Direction) -> list[str]:
     if transpose_needed:
         new_lines = transpose(new_lines)
     
-    print(f"\nAfter:")
-    print("\n".join(new_lines))
+    #print(f"\nAfter:")
+    #print("\n".join(new_lines))
     return new_lines
 
 def calculate_load(lines: list[str], direction: Direction) -> int:
@@ -82,19 +82,60 @@ def calculate_load(lines: list[str], direction: Direction) -> int:
         total_load += line.count("O") * maximum_load
         maximum_load -= 1
 
-    print(f"\nTotal load is {total_load} (direction={direction})\n")
+    print(f"Total load is {total_load} (direction={direction})")
     return total_load
 
-'''
+''' testing code
 load_example = ["O#OO", "O.##", "O.#."]
 for direction in Direction:
     total_load = calculate_load(load_example, direction)
 exit()
-
-for direction in Direction:
-    tilt_platform(lines, direction)
 '''
 
+''' Part 1
 direction = Direction.NORTH
 tilted_north = tilt_platform(lines, direction)
 calculate_load(tilted_north, direction)
+'''
+
+# Part 2
+# Each cycle tilts the platform four times so that the rounded rocks roll north, then west, then south, then east. 
+# Run the spin cycle for 1000000000 cycles. Afterward, what is the total load on the north support beams?
+
+tilted = lines
+cycle = 0
+max_cycles = 1000000000
+configurations = [tilted]
+loads = [calculate_load(tilted, Direction.NORTH)]
+cycle_start = 0
+cycle_end = 0
+
+while cycle < max_cycles:
+    for direction in Direction:
+        tilted = tilt_platform(tilted, direction)
+
+    cycle += 1    
+    #print(f"\nAfter {cycle} cycles:")
+    #print("\n".join(tilted))
+
+    load = calculate_load(tilted, Direction.NORTH)
+    if tilted in configurations:
+        duplicate_cycle = configurations.index(tilted)
+        print(f"Cycle {cycle} is identical to cycle {duplicate_cycle}")
+        cycle_start = duplicate_cycle
+        cycle_end = cycle-1
+        break
+
+    configurations.append(tilted)
+    loads.append(load)
+    print(f"{len(configurations)} configurations")
+
+print(f"\nLoads: {loads} (len={len(loads)})")
+print(f"Cycle start at {cycle_start}: {loads[cycle_start]}")
+print(f"Cycle end at {cycle_end}: {loads[cycle_end]}")
+
+pre_cycle_length = cycle_start
+cycle_length = cycle_end - cycle_start + 1
+offset = (max_cycles - pre_cycle_length) % cycle_length
+load_at_max_cycle = loads[cycle_start+offset]
+print(f"Load at max cycle ({max_cycles}) = {load_at_max_cycle}")
