@@ -176,6 +176,7 @@ def fill_grid(grid: Grid) -> None:
             prev_char = this_char
 
 
+""" Part 1
 dig_path_length = 0
 for line in dig:
     dig_path_length += line.count("#")
@@ -185,6 +186,62 @@ dig_volume = 0
 fill_grid(dig)
 for line in dig:
     dig_volume += line.count("#")
-print(f"dig volume = {dig_volume}")
+print(f"dig volume = {dig_volume}") """
 
-create_image_from_2d_list(dig, output_file=f"{data} filled.png")
+# create_image_from_2d_list(dig, output_file=f"{data} filled.png")
+
+
+# Part 2
+# After a few minutes, someone realizes what happened;
+# someone swapped the color and instruction parameters when producing the dig plan.
+
+
+def shoelace_formula(x_coords: list[int], y_coords: list[int]) -> int:
+    # Calculate the area of an irregular polygon using the Shoelace formula.
+
+    n = len(x_coords)
+
+    area = sum(  # (Chat-GPT)
+        x_coords[i] * y_coords[(i + 1) % n] - x_coords[(i + 1) % n] * y_coords[i]
+        for i in range(n)
+    )
+
+    return abs(area) // 2
+
+
+hex_direction_mapping = {
+    "3": Direction.UP,
+    "0": Direction.RIGHT,
+    "1": Direction.DOWN,
+    "2": Direction.LEFT,
+}
+
+x_coordinates, y_coordinates = [0], [0]
+path_length = 0
+
+for line in lines:
+    # (#70c710) --> 70c710
+    hex = line.split()[-1][2:-1]
+    direction = hex_direction_mapping[hex[-1]]
+    distance = int(hex[:-1], 16)  # 70c71 = 461937
+    path_length += distance
+    # print(f"{direction} {distance}")
+    previous_x = x_coordinates[-1]
+    previous_y = y_coordinates[-1]
+    if direction == Direction.UP:
+        x_coordinates.append(previous_x)
+        y_coordinates.append(previous_y - distance)
+    elif direction == Direction.RIGHT:
+        x_coordinates.append(previous_x + distance)
+        y_coordinates.append(previous_y)
+    elif direction == Direction.DOWN:
+        x_coordinates.append(previous_x)
+        y_coordinates.append(previous_y + distance)
+    elif direction == Direction.LEFT:
+        x_coordinates.append(previous_x - distance)
+        y_coordinates.append(previous_y)
+
+area = shoelace_formula(x_coordinates, y_coordinates)
+
+print(f"Path length = {path_length}")
+print("Volume = ", 1 + area + path_length // 2)
